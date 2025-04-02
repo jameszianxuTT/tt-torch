@@ -164,7 +164,7 @@ def torch_to_shlo(gm: torch.fx.GraphModule, example_inputs, compiler_config):
     return module, program, graph_constants
 
 
-def shlo_to_flatbuffer(executor, module, compiler_config):
+def shlo_to_flatbuffer(executor, module, compiler_config, example_inputs):
 
     if compiler_config.profile_ops:
         compiler_config.set_stablehlo_mlir_module(module.operation.get_asm())
@@ -186,13 +186,14 @@ def shlo_to_flatbuffer(executor, module, compiler_config):
 
 
 def _base_backend(gm, example_inputs, compiler_config):
+    print("Entering base backend")
     shlo, program, graph_constants = torch_to_shlo(gm, example_inputs, compiler_config)
     executor = Executor(program, graph_constants, compiler_config)
 
     if compiler_config.compile_depth == CompileDepth.STABLEHLO:
         return executor
 
-    binary = shlo_to_flatbuffer(executor, shlo, compiler_config)
+    binary = shlo_to_flatbuffer(executor, shlo, compiler_config, example_inputs)
     executor.set_binary(binary)
     return executor
 
@@ -229,5 +230,4 @@ def backend(gm, example_inputs, options=None):
                 graph_constants=graph_constants,
             )
 
-    print("[James] Running in EXECUTE")
     return _base_backend(gm, example_inputs, compiler_config=options)
