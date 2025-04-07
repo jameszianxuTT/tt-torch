@@ -29,6 +29,7 @@ sentencepiece
 seaborn
 setuptools
 soundfile
+supervision
 tabulate
 tiktoken
 timm
