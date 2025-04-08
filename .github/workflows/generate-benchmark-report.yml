@@ -2,6 +2,12 @@ name: Generate Benchmark Report
 
 on:
   workflow_call:
+  workflow_dispatch:
+    inputs:
+      benchmark_report_path:
+          description: 'Path to the benchmark XLSX report file relative to repo root.'
+          required: false
+
 jobs:
   tests:
     timeout-minutes: 30
@@ -39,6 +45,20 @@ jobs:
     - name: Git safe dir
       run: git config --global --add safe.directory ${{ steps.strings.outputs.work-dir }}
 
+    - name: Conditionally upload benchmark report and exit
+      if: ${{ inputs.benchmark_report_path != '' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-report
+        path: ${{ inputs.benchmark_report_path }}
+      continue-on-error: true
+    
+    - name: Early exit if benchmark report was uploaded
+      if: ${{ inputs.benchmark_report_path != '' }}
+      run: |
+        echo "Benchmark report uploaded. Exiting workflow early."
+        exit 0
+    
     - name: Download Depth Benchmark Artifacts
       uses: actions/download-artifact@v4
       with:
