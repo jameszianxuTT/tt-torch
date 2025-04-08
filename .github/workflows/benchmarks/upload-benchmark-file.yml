@@ -8,7 +8,10 @@ on:
                 required: false
                 default: 'benchmark_report.xlsx'
     pull_request:
-        branches:
+      branches:
+        - '**'
+    push:
+      branches:
         - '**'
 
 jobs:
